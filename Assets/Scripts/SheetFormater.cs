@@ -4,7 +4,7 @@ using NPOI.XSSF.UserModel;
 using System.IO;
 using Sych.ShareAssets.Runtime;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 
 /// <summary>
 /// Classe responsável por formatar dados a uma planilha.
@@ -129,18 +129,24 @@ public class SheetFormater
     {
         if (!string.IsNullOrEmpty(path) && File.Exists(path))
         {
-            var items = new List<string> { path };
-
-            Share.Items(items, sucess =>
+            try
             {
-                Debug.Log($"Compartilhamento: {(sucess ? "sucesso" : "falha")}");
-
-                if (sucess)
+                foreach (var item in new List<string> { path })
                 {
-                    Debug.Log("Planilha compartilhada e removida do cache.");
-                    File.Delete(path);
+                    bool success = await Share.ItemAsync(item);
+                    Debug.Log($"Compartilhamento: {(success ? "sucesso" : "falha")}");
+
+                    if (success)
+                    {
+                        Debug.Log("Planilha compartilhada e removida do cache.");
+                        File.Delete(path);
+                    }
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Erro ao compartilhar a planilha: {ex.Message}");
+            }
         }
         else
         {
