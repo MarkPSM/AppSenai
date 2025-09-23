@@ -2447,7 +2447,6 @@ GameObject:
   - component: {fileID: 1310314684}
   - component: {fileID: 1310314683}
   - component: {fileID: 1310314689}
-  - component: {fileID: 1310314688}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2671,18 +2670,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &1310314688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1310314681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec99e360cff26e0458c1148dc1a3817a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1310314689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3934,6 +3921,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2038611968
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2038611970}
+  - component: {fileID: 2038611969}
+  m_Layer: 0
+  m_Name: QRManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2038611969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038611968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec99e360cff26e0458c1148dc1a3817a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestedWidth: 1280
+  requestedHeight: 720
+  requestedFPS: 40
+  scanInterval: 0.25
+  continuousScan: 0
+  onQRDetected:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &2038611970
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038611968}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.46799, y: 0, z: -0.59642}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -3945,3 +3984,4 @@ SceneRoots:
   - {fileID: 122035068}
   - {fileID: 571697270}
   - {fileID: 311475832}
+  - {fileID: 2038611970}
