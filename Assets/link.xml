@@ -1,0 +1,9 @@
+<linker>
+	<assembly fullname="NPOI">
+		<type fullname="NPOI.Util.POILogFactory" preserve="nothing"/>
+		<type fullname="NPOI.Util.NullLogger" preserve="all"/>
+	</assembly>
+	<assembly fullname="NPOI.OOXML">
+		<type fullname="NPOI.OpenXml4Net.Util.NullLogger" preserve="all"/>
+	</assembly>
+</linker>

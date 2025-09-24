@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using ZXing;
@@ -13,21 +14,25 @@ public class QRManager : MonoBehaviour
     [Header("Configurações da Câmera")]
     public int requestedWidth = 1280;
     public int requestedHeight = 720;
-    public int requestedFPS = 40;
+    public int requestedFPS = 30;
 
     [Header("Scanner")]
-    public float scanInterval = 0.25f;
     public bool continuousScan = false;
+    public float scanInterval = 0.25f;
+
+    [Header("UI")]
+    public TextMeshProUGUI logText;
 
     [Header("Eventos")]
     public QRDetectedEvent onQRDetected;
 
     private WebCamTexture camTexture;
-    private IBarcodeReader barcodeReader;
+    private BarcodeReader barcodeReader;
     private bool scanning = false;
-    private bool isProcessing = false;
+    private bool isDecoding = false;
+    private float nextScanTime = 0f;
 
-    private void Awake()
+    void Start()
     {
         barcodeReader = new BarcodeReader
         {
@@ -38,61 +43,31 @@ public class QRManager : MonoBehaviour
                 PossibleFormats = new[] { BarcodeFormat.QR_CODE }
             }
         };
+
+        if (logText != null)
+            onQRDetected.AddListener(UpdateResultText);
+
+        StartCamera();
     }
 
-    private IEnumerator Start()
+    public void StartCamera()
     {
-        yield return StartCoroutine(StartCamera());
-    }
+        if (scanning) return;
 
-    /// <summary>
-    /// Inicia a câmera e o loop de leitura
-    /// </summary>
-    public IEnumerator StartCamera()
-    {
-        if (scanning) yield break;
-
-#if UNITY_ANDROID || UNITY_IOS
-        if (!Application.HasUserAuthorization(UserAuthorization.WebCam))
+        if (WebCamTexture.devices.Length == 0)
         {
-            var req = Application.RequestUserAuthorization(UserAuthorization.WebCam);
-            yield return req;
-            if (!Application.HasUserAuthorization(UserAuthorization.WebCam))
-            {
-                Debug.LogWarning("Permissão de câmera não concedida.");
-                yield break;
-            }
-        }
-#endif
-
-        string camName = null;
-        foreach (var device in WebCamTexture.devices)
-        {
-            if (!device.isFrontFacing)
-            {
-                camName = device.name;
-                break;
-            }
-        }
-        if (camName == null && WebCamTexture.devices.Length > 0)
-            camName = WebCamTexture.devices[0].name;
-
-        if (string.IsNullOrEmpty(camName))
-        {
-            Debug.LogError("Nenhuma câmera encontrada!");
-            yield break;
+            LogOutput("Nenhuma câmera encontrada!");
+            return;
         }
 
+        string camName = WebCamTexture.devices[0].name;
         camTexture = new WebCamTexture(camName, requestedWidth, requestedHeight, requestedFPS);
         camTexture.Play();
 
         scanning = true;
-        StartCoroutine(ScanLoop());
+        LogOutput($"Câmera iniciada: {camName} ({requestedWidth}x{requestedHeight}@{requestedFPS}fps)");
     }
 
-    /// <summary>
-    /// Para a câmera
-    /// </summary>
     public void StopCamera()
     {
         scanning = false;
@@ -102,62 +77,52 @@ public class QRManager : MonoBehaviour
             Destroy(camTexture);
             camTexture = null;
         }
+        LogOutput("Câmera parada.");
     }
 
-    /// <summary>
-    /// Loop que chama o scanner a cada scanInterval
-    /// </summary>
-    private IEnumerator ScanLoop()
+    void Update()
     {
-        while (scanning)
+        if (!scanning || camTexture == null || camTexture.width < 100) return;
+
+        if (!isDecoding && Time.time >= nextScanTime)
         {
-            if (!isProcessing && camTexture != null && camTexture.isPlaying && camTexture.width > 100)
-            {
-                StartCoroutine(ProcessFrame());
-            }
-            yield return new WaitForSeconds(scanInterval);
+            nextScanTime = Time.time + scanInterval;
+            DecodeAsync(camTexture.GetPixels32(), camTexture.width, camTexture.height);
         }
     }
 
-    /// <summary>
-    /// Processa um frame da câmera
-    /// </summary>
-    private IEnumerator ProcessFrame()
+    private async void DecodeAsync(Color32[] pixels, int width, int height)
     {
-        isProcessing = true;
+        isDecoding = true;
 
-        try
+        var result = await Task.Run(() => barcodeReader.Decode(pixels, width, height));
+
+        if (result != null)
         {
-            var pixels = camTexture.GetPixels32();
-            int width = camTexture.width;
-            int height = camTexture.height;
+            LogOutput("QR Detectado: " + result.Text);
+            onQRDetected?.Invoke(result.Text);
 
-            var result = barcodeReader.Decode(pixels, width, height);
+            if (!continuousScan) StopCamera();
+        }
 
-            if (result != null)
-            {
-                Debug.Log("QR Detectado: " + result.Text);
-                onQRDetected?.Invoke(result.Text);
-
-                if (!continuousScan)
-                {
-                    StopCamera();
-                    yield break;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning("Erro ao processar QR: " + ex.Message);
-        }
-        finally
-        {
-            isProcessing = false;
-        }
+        isDecoding = false;
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         StopCamera();
+    }
+
+    private void UpdateResultText(string scannedText)
+    {
+        if (logText != null)
+            logText.text = $"QR: {scannedText}";
+    }
+
+    private void LogOutput(string msg)
+    {
+        Debug.Log(msg);
+        if (logText != null)
+            logText.text = msg;
     }
 }

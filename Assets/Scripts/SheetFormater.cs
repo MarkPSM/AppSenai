@@ -5,6 +5,7 @@ using System.IO;
 using Sych.ShareAssets.Runtime;
 using System.Collections.Generic;
 using System;
+using NPOI.Util;
 
 /// <summary>
 /// Classe responsável por formatar dados a uma planilha.

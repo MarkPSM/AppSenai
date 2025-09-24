@@ -3950,6 +3950,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec99e360cff26e0458c1148dc1a3817a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestedWidth: 1280
+  requestedHeight: 720
+  requestedFPS: 40
+  continuousScan: 0
+  logText: {fileID: 2004486464}
+  onQRDetected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &2038611970
 Transform:
   m_ObjectHideFlags: 0
